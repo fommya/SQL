@@ -1,0 +1,127 @@
+CREATE TABLE actors (
+  id INTEGER PRIMARY KEY AUTO_INCREMENT,
+  fullname TEXT,
+  age INTEGER,
+  movie_id INTEGER
+);
+
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Bradley Cooper', 49, 6);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Colman Domingo', 54, 13);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Paul Giamatti', 56, 4);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Cillian Murphy', 47, 7);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Jeffrey Wright', 58, 1);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Annette Bening', 65, 14);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Lily Gladstone', 37, 5);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Sandra Huüller', 45, 2);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Carey Mulligan', 38, 6);
+INSERT INTO actors (fullname, age, movie_id) VALUES ('Emma Stone', 35, 9);
+
+CREATE TABLE films (
+  id INTEGER PRIMARY KEY AUTO_INCREMENT,
+  title TEXT,
+  box_office_revenue INTEGER
+);
+
+-- Insert data into the new table
+INSERT INTO films (title, box_office_revenue) VALUES ('American Fiction', 8700000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Anatomy of A Fall', 23100000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Barbie', 1450000000);
+INSERT INTO films (title, box_office_revenue) VALUES ('The Holdovers', 26400000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Killers Of The Flower Moon', 156400000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Maestro', 458000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Oppenheimer', 953800000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Past Lives', 22600000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Poor Things', 12830000);
+INSERT INTO films (title, box_office_revenue) VALUES ('The Zone Of Interest', 1600000);
+INSERT INTO films (title, box_office_revenue) VALUES ('May December', 809157);
+INSERT INTO films (title, box_office_revenue) VALUES ('Napoleon', 218400000);
+INSERT INTO films (title, box_office_revenue) VALUES ('Rustin', NULL);
+INSERT INTO films (title, box_office_revenue) VALUES ('Nyad', 16098);
+
+CREATE TABLE nominations (
+  id INTEGER PRIMARY KEY AUTO_INCREMENT,
+  title TEXT,
+  movie_id INTEGER
+);
+
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 1);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 2);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 3);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 4);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 5);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 6);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 7);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 8);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 9);
+INSERT INTO nominations (title, movie_id) VALUES ('Best Picture', 10);
+INSERT INTO nominations (title, movie_id) VALUES ('Adapted Screenplay', 1);
+INSERT INTO nominations (title, movie_id) VALUES ('Adapted Screenplay', 3);
+INSERT INTO nominations (title, movie_id) VALUES ('Adapted Screenplay', 7);
+INSERT INTO nominations (title, movie_id) VALUES ('Adapted Screenplay', 9);
+INSERT INTO nominations (title, movie_id) VALUES ('Adapted Screenplay', 10);
+INSERT INTO nominations (title, movie_id) VALUES ('Original Screenplay', 2);
+INSERT INTO nominations (title, movie_id) VALUES ('Original Screenplay', 4);
+INSERT INTO nominations (title, movie_id) VALUES ('Original Screenplay', 6);
+INSERT INTO nominations (title, movie_id) VALUES ('Original Screenplay', 8);
+INSERT INTO nominations (title, movie_id) VALUES ('Original Screenplay', 11);
+
+CREATE TABLE presenters (
+  id INTEGER PRIMARY KEY AUTO_INCREMENT,
+  person1_id INTEGER,
+  person2_id INTEGER,
+  award TEXT
+);
+
+INSERT INTO presenters (person1_id, person2_id, award) VALUES (3, 5, 'Original Screenplay');
+INSERT INTO presenters (person1_id, person2_id, award) VALUES (1, 7, 'Best Picture');
+INSERT INTO presenters (person1_id, person2_id, award) VALUES (8, 9, 'Adapted Screenplay');
+
+
+
+#Analysis
+
+/*Show films starring Best Lead nominees*/
+SELECT f.title AS film_title, GROUP_CONCAT (a.fullname) AS nominated_actors 
+FROM films AS f
+JOIN actors AS a
+ON a.movie_id=f.id
+GROUP BY f.title
+ORDER BY f.title;
+
+/*Show films that received a nomination*/
+SELECT f.title AS film_title, GROUP_CONCAT (n.title) AS nominations
+FROM films AS f
+RIGHT JOIN nominations AS n
+ON f.id = n.movie_id
+GROUP BY f.title;
+
+/*Show the names of the presenters and the category they are presenting*/
+SELECT award, GROUP_CONCAT (a.fullname, 'and', ',', b.fullname) AS presenters
+FROM presenters 
+JOIN actors a
+ON person1_id=a.id
+JOIN actors b
+ON person2_id=b.id
+GROUP BY award;
+
+/*Show the names of actors who starred in films with a Best Picture nomination*/ 
+SELECT GROUP_CONCAT (a.fullname) AS actors, f.title as film_title
+FROM actors as a
+JOIN films as f
+ON a.movie_id = f.id
+JOIN nominations as n
+ON f.id = n.movie_id
+WHERE n.title = 'Best Picture'
+GROUP BY f.title;
+
+/*Who is the youngest nominated actor?*/
+SELECT fullname, age
+FROM actors
+WHERE age = (SELECT MIN(age) FROM actors);
+
+/*Which actors are not presenting any awards?*/
+SELECT fullname
+FROM actors
+WHERE id NOT IN (SELECT person1_id FROM presenters UNION SELECT person2_id FROM presenters);
+
+
