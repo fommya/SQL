@@ -114,6 +114,11 @@ ON f.id = n.movie_id
 WHERE n.title = 'Best Picture'
 GROUP BY f.title;
 
+/*Which films grossed over 100 million in box office revenue?*/
+SELECT title as film_title, ROUND(box_office_revenue / 1000000, 2) AS bo_revenue_millions
+FROM films
+WHERE box_office_revenue > 100000000;
+
 /*Who is the youngest nominated actor?*/
 SELECT fullname, age
 FROM actors
