@@ -1,10 +1,19 @@
+#In this SQL, I am querying a database with multiple sales tables in it in order to quantify statistics about customer and order data
+
+#1. How many orders were placed in January? 
+SELECT COUNT(orderid)
+  FROM BIT_DB.JanSales
+  WHERE length(orderid) = 6 AND
+  orderid <> 'Order ID'
+
+#2. How many of those orders were for an iPhone? 
 SELECT COUNT(orderID) 
   FROM BIT_DB.JanSales
  WHERE length(orderID) = 6 AND 
        orderID <> 'Order ID' AND 
        Product = 'iPhone';
 
-
+#3. Select the customer account numbers for all the orders that were placed in February. 
 SELECT DISTINCT acctnum
   FROM BIT_DB.customers AS c
        INNER JOIN
@@ -12,7 +21,7 @@ SELECT DISTINCT acctnum
  WHERE length(orderID) = 6 AND 
        orderID <> 'Order ID';
 
-
+#4. Which product was the cheapest sold in January and what was the price? 
 SELECT DISTINCT Product,
                 price
   FROM BIT_DB.JanSales
@@ -22,6 +31,7 @@ SELECT DISTINCT Product,
        );
 
 
+#5. What is the total revenue for each product sold in January? 
 SELECT Product,
        ROUND(SUM(quantity) * price,2) AS revenue
   FROM BIT_DB.JanSales
@@ -30,6 +40,7 @@ SELECT Product,
  GROUP BY Product;
 
 
+#6. Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
 SELECT Product,
        SUM(Quantity),
        SUM(quantity) * price AS revenue
@@ -37,7 +48,7 @@ SELECT Product,
  WHERE location = '548 Lincoln St, Seattle, WA 98101'
  GROUP BY Product;
 
-
+#7. How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
 SELECT COUNT(DISTINCT c.acctnum),
        ROUND(AVG(price * quantity),2) AS average_spent
   FROM BIT_DB.FebSales AS feb
