@@ -1,0 +1,130 @@
+# For this project, I downloaded Spotify data from Kaggle.
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+#Creating the table: 
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+#Then I inserted the Spotify Data .csv into the table.
+
+#Next, I explored the data using the following SQL. 
+
+--Who are the top 10 artists based on popularity? 
+SELECT artist_name,
+       popularity
+  FROM BIT_DB.Spotifydata
+ GROUP BY artist_name
+ ORDER BY popularity DESC
+ LIMIT 10;
+
+
+--What is the average danceablitity of the top 10 songs? 
+SELECT AVG(danceability) AS avg_danceability
+  FROM (
+           SELECT danceability
+             FROM Spotifydata
+            ORDER BY popularity DESC
+            LIMIT 10
+       )AS top_10_songs;
+       
+       
+--What is the average danceability by artist? 
+SELECT DISTINCT artist_name,
+                AVG(danceability) AS avg_danceability
+  FROM BIT_DB.Spotifydata
+ GROUP BY artist_name
+ ORDER BY avg_danceability;
+
+
+--Which song key and modality combination tends to be more favorable for a song to be popular? 
+SELECT ROUND(AVG(popularity), 2) AS avg_popularity,
+       song_mode,
+       song_key
+  FROM BIT_DB.Spotifydata
+ GROUP BY song_mode,
+          song_key
+ ORDER BY avg_popularity DESC
+ LIMIT 10;
+
+
+--Which artist released the longest track and what was the track name? 
+SELECT artist_name,
+       track_name,
+       duration_ms
+  FROM BIT_DB.Spotifydata
+ ORDER BY duration_ms DESC
+ LIMIT 1;
+
+--What is the average energy level for songs in Minor and Major mode? 
+SELECT 
+    CASE 
+        WHEN song_mode = 1 THEN 'Major'
+        WHEN song_mode = 0 THEN 'Minor'
+        ELSE 'Unknown'
+    END AS mode,
+    AVG(energy) AS avg_energy
+FROM BIT_DB.Spotifydata
+GROUP BY song_mode;
+
+--Which artsits have more than 2 songs in the top 50 chart? 
+SELECT artist_name,
+       COUNT(track_id) 
+  FROM BIT_DB.Spotifydata
+ GROUP BY artist_name
+HAVING COUNT(track_id) > 2;
+
+
+--What is the average tempo and loudness for Doja Cat's songs? 
+SELECT artist_name,
+       AVG(loudness) AS avg_loudness,
+       AVG(tempo) AS avg_tempo
+  FROM BIT_DB.Spotifydata
+ WHERE artist_name = 'Doja Cat'
+ GROUP BY artist_name;
+
+--What songs have other artists featured in them? 
+SELECT track_name
+  FROM BIT_DB.Spotifydata
+ WHERE track_name LIKE '%feat%' OR 
+       track_name LIKE '%ft.%' OR 
+       track_name LIKE '%(with%';
+       
+--The average energy for the top 10 songs is 0.683, how do all the songs compare to that average? 
+SELECT artist_name,
+       track_name,
+       energy,
+       CASE 
+       WHEN energy >= 0.7 THEN 'Above Average' 
+       WHEN energy >= 0.6 AND energy < 0.7 THEN 'Average' 
+       WHEN energy < 0.6 THEN 'Below Average' 
+       END AS compare_energy
+  FROM BIT_DB.Spotifydata;
+
+
+--What songs have the highest speechiness index and how popular are they?  
+SELECT artist_name,
+    track_name, 
+    speechiness,
+    popularity
+FROM BIT_DB.Spotifydata
+ORDER BY speechiness DESC
+LIMIT 5; 
